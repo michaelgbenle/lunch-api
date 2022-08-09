@@ -17,10 +17,9 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"time"
 )
 
-func TestGetBrunchHandle(t *testing.T) {
+func TestGetFoodBeneficiaryProfile(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mockDb := mocks.NewMockUserRepository(ctrl)
 
@@ -30,59 +29,49 @@ func TestGetBrunchHandle(t *testing.T) {
 	router := server.SetupRouter(r, mockDb)
 
 	user := models.User{
-		FullName: "Joseph A",
-		Email:    "joseph@decagon.dev",
-		IsActive: true,
+		FullName: "Orji Cecilia",
+		Email:    "cecilia.orji@decagonhq.com",
+		Location: "Edo Tech Park",
+		Avatar:   "img.png",
 	}
-
-	benefactor := models.FoodBeneficiary{
+	foodBeneficiary := models.FoodBeneficiary{
 		User:  user,
-		Stack: "Golang",
-	}
-	year, month, day := time.Now().Date()
-
-	food := models.Food{
-		Name:      "Egusi and Swallow",
-		Type:      "BRUNCH",
-		AdminName: "Joseph Asuquo",
-		Year:      year,
-		Month:     int(month),
-		Day:       day,
-		Weekday:   "Friday",
-		Status:    "Not serve",
+		Stack: "golang",
 	}
 
-	foods := []models.Food{
-		food,
-	}
+	admin := models.Admin{User: user}
 
-	bytes, _ := json.Marshal(food)
+	id := "1"
+	bytes, _ := json.Marshal(id)
 
 	secret := os.Getenv("JWT_SECRET")
-	accessClaims, _ := middleware.GenerateClaims(benefactor.Email)
+	accessClaims, _ := middleware.GenerateClaims(admin.Email)
 	accToken, _ := middleware.GenerateToken(jwt.SigningMethodHS256, accessClaims, &secret)
 
-	t.Run("testing bad request", func(t *testing.T) {
+	t.Run("test bad request", func(t *testing.T) {
 		mockDb.EXPECT().TokenInBlacklist(gomock.Any()).Return(false)
-		mockDb.EXPECT().FindFoodBenefactorByEmail(benefactor.Email).Return(&benefactor, nil)
-		mockDb.EXPECT().FindBrunchByDate(year, food.Month, day).Return(nil, errors.New("internal server error"))
+		mockDb.EXPECT().FindAdminByEmail(admin.Email).Return(&admin, nil)
+		mockDb.EXPECT().GetFoodBenefactorById(gomock.Any()).Return(nil, errors.New("record not found"))
 		rw := httptest.NewRecorder()
-		req, _ := http.NewRequest(http.MethodGet, "/api/v1/benefactor/brunch", strings.NewReader(string(bytes)))
+		req, _ := http.NewRequest(http.MethodGet, "/api/v1/admin/getfoodbeneficiaryprofile/1", strings.NewReader(string(bytes)))
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *accToken))
 		router.ServeHTTP(rw, req)
 		assert.Equal(t, http.StatusInternalServerError, rw.Code)
 		assert.Contains(t, rw.Body.String(), "internal server error")
 	})
 
-	t.Run("testing Successful request", func(t *testing.T) {
+	t.Run("Successful Profile Gotten", func(t *testing.T) {
 		mockDb.EXPECT().TokenInBlacklist(gomock.Any()).Return(false)
-		mockDb.EXPECT().FindFoodBenefactorByEmail(benefactor.Email).Return(&benefactor, nil)
-		mockDb.EXPECT().FindBrunchByDate(year, food.Month, day).Return(foods, nil)
+		mockDb.EXPECT().FindAdminByEmail(admin.Email).Return(&admin, nil)
+		mockDb.EXPECT().GetFoodBenefactorById(id).Return(&foodBeneficiary, nil)
 		rw := httptest.NewRecorder()
-		req, _ := http.NewRequest(http.MethodGet, "/api/v1/benefactor/brunch", strings.NewReader(string(bytes)))
+		req, _ := http.NewRequest(http.MethodGet,
+			"/api/v1/admin/getfoodbeneficiaryprofile/1",
+			strings.NewReader(string(bytes)))
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *accToken))
+
 		router.ServeHTTP(rw, req)
 		assert.Equal(t, http.StatusOK, rw.Code)
-		assert.Contains(t, rw.Body.String(), "Brunch found")
+		assert.Contains(t, rw.Body.String(), "food beneficiary details retrieved")
 	})
 }

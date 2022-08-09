@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/decadevs/lunch-api/internal/adapters/repository"
 )
 
 func (u *HTTPHandler) UpdateBrunchFoodStatus(c *gin.Context) {
@@ -16,7 +18,8 @@ func (u *HTTPHandler) UpdateBrunchFoodStatus(c *gin.Context) {
 		helpers.JSON(c, "An internal server error", 500, nil, []string{"internal server error"})
 		return
 	}
-	year, month, day := time.Now().Date()
+	year, mon, day := time.Now().Date()
+	month := int(mon)
 
 	food, err := u.UserService.FindBrunchByDate(year, month, day)
 	if err != nil {
@@ -35,6 +38,12 @@ func (u *HTTPHandler) UpdateBrunchFoodStatus(c *gin.Context) {
 		return
 	}
 
+	inputField, err := repository.StatusEnum(status.Status)
+	if err != nil {
+		helpers.JSON(c, "This is an internal server error", 500, inputField, []string{"incorrect status field"})
+		return
+	}
+
 	errS := u.UserService.UpdateStatus(food, status.Status)
 	if errS != nil {
 		helpers.JSON(c, "An internal server error", 500, nil, []string{"error updating food"})
@@ -44,16 +53,17 @@ func (u *HTTPHandler) UpdateBrunchFoodStatus(c *gin.Context) {
 	notification := models.Notification{
 		Message: status.Status,
 		Year:    year,
-		Month:   time.Month(month),
+		Month:   month,
 		Day:     day,
 	}
 
 	err = u.UserService.CreateNotification(notification)
 
-	currentFood, _ := u.UserService.FindBrunchByDate(year, month, day)
+	currentFood, _ := u.UserService.FindBrunchByDate(year, int(month), day)
 	helpers.JSON(c, "food status updated successfully", http.StatusOK, currentFood, nil)
 }
 
+//UpdateDinnerFoodStatus handler to change dinner status
 func (u *HTTPHandler) UpdateDinnerFoodStatus(c *gin.Context) {
 	user, err := u.GetKitchenStaffFromContext(c)
 	log.Println("user in context", user)
@@ -61,7 +71,8 @@ func (u *HTTPHandler) UpdateDinnerFoodStatus(c *gin.Context) {
 		helpers.JSON(c, "An internal server error", 500, nil, []string{"internal server error"})
 		return
 	}
-	year, month, day := time.Now().Date()
+	year, mon, day := time.Now().Date()
+	month := int(mon)
 
 	food, err := u.UserService.FindDinnerByDate(year, month, day)
 	if err != nil {
@@ -89,7 +100,7 @@ func (u *HTTPHandler) UpdateDinnerFoodStatus(c *gin.Context) {
 	notification := models.Notification{
 		Message: status.Status,
 		Year:    year,
-		Month:   time.Month(month),
+		Month:   month,
 		Day:     day,
 	}
 
