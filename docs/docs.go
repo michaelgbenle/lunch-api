@@ -25,6 +25,88 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin/blockedusers": {
+            "get": {
+                "description": "Admin gets to see all blocked users with this endpoint. It is an authorized route to only ADMIN",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "This endpoint enables admin to see all blocked users",
+                "responses": {
+                    "200": {
+                        "description": "blocked users successfully gotten",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.FoodBeneficiary"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/blockfoodbeneficiary/{id}": {
+            "put": {
+                "description": "Admin blocks a food beneficiary",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Block a food beneficiary",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "food beneficiary blocked",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/createtimetable": {
             "post": {
                 "description": "creates meal by collecting fields in models.Food in a form data. Note: \"images\" is a file to be uploaded in jpeg or png. \"name\" is the name of the meal, \"type\" is either brunch or dinner, \"weekday\" can be ignored but it is either monday - sunday, \"kitchen\" is either uno, edo-tech park, etc. \"year\", \"month\" and \"day\" are numbers. It is an authorized route to only ADMIN",
@@ -71,27 +153,27 @@ const docTemplate = `{
                 }
             }
         },
-        "/benefactor/allfood": {
-            "get": {
-                "description": "This should be used to get all the food in the database meant for today. This should be used instead of GetBrunch and GetDinner seperately for scalability purpose when rendering on the Beneficiary dashboard. Frontend can seperate dinner and brunch. It is an authorized route to only foodBeneficiary",
+        "/admin/deletemeal/:id": {
+            "delete": {
+                "description": "Delete meal by clicking on the particular food. The id of each food is attached to the link/endpoint. When you click on the food to be deleted, the id is gotten from the link/endpoint and the food is deleted. It is an authorized route to only ADMIN",
                 "consumes": [
-                    "application/json"
-                ],
-                "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Food"
                 ],
-                "summary": "Gets all the food in the database using the date of the present day",
+                "summary": "Admin deletes meal",
                 "responses": {
                     "200": {
-                        "description": "Food successfully gotten",
+                        "description": "Successfully Deleted",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Food"
-                            }
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "not authorized",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     "500": {
@@ -103,9 +185,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/benefactor/brunch": {
+        "/admin/getfoodbeneficiaryprofile/{id}": {
             "get": {
-                "description": "Gets all the brunch in the database meant for today. GetAllFood should be used instead for scalability purpose when rendering on the Beneficiary dashboard. Frontend can filter brunch and dinner It is an authorized route to only foodBeneficiary",
+                "description": "Admin gets to see the profile information of a food beneficiary. It is an authorized route to only ADMIN",
                 "consumes": [
                     "application/json"
                 ],
@@ -113,17 +195,20 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Food"
+                    "Users"
                 ],
-                "summary": "Gets all the brunch in the database using the date of the present day",
+                "summary": "Gets profile of a food beneficiary",
                 "responses": {
                     "200": {
-                        "description": "Brunch found",
+                        "description": "successfully gotten",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Food"
-                            }
+                            "type": "number"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     "500": {
@@ -135,9 +220,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/benefactor/dinner": {
+        "/admin/numberblocked": {
             "get": {
-                "description": "Gets all the dinner in the database meant for today. GetAllFood should be used instead for scalability purpose when rendering on the Beneficiary dashboard. Frontend can filter brunch and dinner It is an authorized route to only foodBeneficiary",
+                "description": "Admin gets to see how manuy beneficiaries blocked. It is an authorized route to only ADMIN",
                 "consumes": [
                     "application/json"
                 ],
@@ -145,17 +230,144 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Food"
+                    "Users"
                 ],
-                "summary": "Gets all the dinner in the database using the date of the present day",
+                "summary": "Gets number of blocked benefeciary",
                 "responses": {
                     "200": {
-                        "description": "Dinner found",
+                        "description": "successfully gotten",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Food"
-                            }
+                            "type": "number"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/updatemeal/:id": {
+            "put": {
+                "description": "Update meal by clicking on the particular food. The id of each food is attached to the link/endpoint. When you click on the food to be updated, the id is gotten from the link/endpoint. It is an authorized route to only ADMIN",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Food"
+                ],
+                "summary": "Admin updates meal",
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "not authorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/adminlogout": {
+            "post": {
+                "description": "Log out admin",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Logout User",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User Email",
+                        "name": "email",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User Token",
+                        "name": "token",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/benefactor/qrmealrecords": {
+            "post": {
+                "description": "This is used to tell if a food beneficiary has scanned the QR code previously or not,it then logs the information .",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Logs meal records in the database after successful QR code scan",
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "meal already served",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     "500": {
@@ -224,6 +436,361 @@ const docTemplate = `{
                 }
             }
         },
+        "/changedinnerstatus": {
+            "put": {
+                "description": "Change dinner food status by kitchen staff from NOT SERVING to either SERVED or SERVING",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Food"
+                ],
+                "summary": "Update Food",
+                "parameters": [
+                    {
+                        "description": "status",
+                        "name": "food",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Food"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/staff/changebrunchstatus": {
+            "put": {
+                "description": "Change brunch food status by kitchen staff from NOT SERVING to either SERVED or SERVING",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Food"
+                ],
+                "summary": "Update Food",
+                "parameters": [
+                    {
+                        "description": "status",
+                        "name": "food",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Food"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/staff/generateqrcode": {
+            "get": {
+                "description": "This should be used to get the food in the database to generate QR code meant for the day.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Food"
+                ],
+                "summary": "Gets the food in the database required to generate QR code",
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/models.Food"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid meal type",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/staff/getbrunchtimetable": {
+            "get": {
+                "description": "Kitchen staff gets the timetable for brunch for a particular date. It is an authorized route to only KITCHEN STAFF",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Gets food for brunch",
+                "responses": {
+                    "200": {
+                        "description": "successfully gotten",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/staff/getdinnertimetable": {
+            "get": {
+                "description": "Kitchen staff gets the timetable for dinner for a particular date. It is an authorized route to only KITCHEN STAFF",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Gets food for dinner",
+                "responses": {
+                    "200": {
+                        "description": "successfully gotten",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/staff/gettotalusers": {
+            "get": {
+                "description": "Kitchen staff gets total number of food beneficiaries. It is an authorized route to only KITCHEN STAFF",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get total number of food beneficiaries",
+                "responses": {
+                    "200": {
+                        "description": "Total number of users",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/staff/getusers": {
+            "get": {
+                "description": "Kitchen staff gets list of food beneficiaries. It is an authorized route to only KITCHEN STAFF",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "GetsFood Beneficiaries",
+                "responses": {
+                    "200": {
+                        "description": "food beneficiaries found successfully",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/staff/removefoodbeneficiary/{id}": {
+            "delete": {
+                "description": "Admin deletes/removes a food beneficiary from the dashboard. It is an authorized route to only ADMIN",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Remove a Food Beneficiary",
+                "responses": {
+                    "200": {
+                        "description": "food beneficiary removed",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/staff/searchbeneficiary/:text": {
+            "get": {
+                "description": "Kitchen staff can search for a food beneficiary by name, location or stack. It is an authorized route to only KITCHEN STAFF",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Search Food Beneficiary",
+                "responses": {
+                    "200": {
+                        "description": "information gotten",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/user/adminlogin": {
             "post": {
                 "description": "Allows Admin to log in in order to use app dashboard. Admin must be active before he or she can log in",
@@ -259,6 +826,140 @@ const docTemplate = `{
                         "description": "bad request",
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/adminsignup": {
+            "post": {
+                "description": "creates a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Create User",
+                "parameters": [
+                    {
+                        "description": "Add user",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Admin"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "success",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/adminverifyemail/{token}": {
+            "patch": {
+                "description": "verifies an admin email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Verify Email",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token string",
+                        "name": "token",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/allfood": {
+            "get": {
+                "description": "This should be used to get all the food in the database meant for today. This should be used instead of GetBrunch and GetDinner seperately for scalability purpose when rendering on the Beneficiary dashboard. Frontend can seperate dinner and brunch.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Gets all the food in the database using the date of the present day",
+                "responses": {
+                    "200": {
+                        "description": "Food successfully gotten",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Food"
+                            }
                         }
                     },
                     "500": {
@@ -411,6 +1112,70 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/brunch": {
+            "get": {
+                "description": "Gets all the brunch in the database meant for today. GetAllFood should be used instead for scalability purpose when rendering on the Beneficiary dashboard. Frontend can filter brunch and dinner.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Gets all the brunch in the database using the date of the present day",
+                "responses": {
+                    "200": {
+                        "description": "Brunch found",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Food"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/dinner": {
+            "get": {
+                "description": "Gets all the dinner in the database meant for today. GetAllFood should be used instead for scalability purpose when rendering on the Beneficiary dashboard. Frontend can filter brunch and dinner.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Gets all the dinner in the database using the date of the present day",
+                "responses": {
+                    "200": {
+                        "description": "Dinner found",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Food"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
                         "schema": {
                             "type": "string"
                         }
@@ -600,6 +1365,58 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.Admin": {
+            "type": "object",
+            "required": [
+                "email",
+                "full_name",
+                "location"
+            ],
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "is_block": {
+                    "type": "boolean"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "password_hash": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Food": {
             "type": "object",
             "properties": {

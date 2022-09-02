@@ -11,6 +11,18 @@ import (
 	"github.com/decadevs/lunch-api/internal/adapters/repository"
 )
 
+// UpdaateFoodStatus godoc
+// @Summary      Update Food
+// @Description  Change brunch food status by kitchen staff from NOT SERVING to either SERVED or SERVING
+// @Tags         Food
+// @Accept       json
+// @Produce      json
+// @Param food body []models.Food true "status"
+// @Success      200  {string}  string "success"
+// @Failure      400  {string}  string "error"
+// @Failure      404  {string}  string "error"
+// @Failure      500  {string}  string "error"
+// @Router       /staff/changebrunchstatus [put]
 func (u *HTTPHandler) UpdateBrunchFoodStatus(c *gin.Context) {
 	user, err := u.GetKitchenStaffFromContext(c)
 	log.Println("user in context", user)
@@ -63,7 +75,18 @@ func (u *HTTPHandler) UpdateBrunchFoodStatus(c *gin.Context) {
 	helpers.JSON(c, "food status updated successfully", http.StatusOK, currentFood, nil)
 }
 
-//UpdateDinnerFoodStatus handler to change dinner status
+// UpdaateFoodStatus godoc
+// @Summary      Update Food
+// @Description  Change dinner food status by kitchen staff from NOT SERVING to either SERVED or SERVING
+// @Tags         Food
+// @Accept       json
+// @Produce      json
+// @Param food body []models.Food true "status"
+// @Success      200  {string}  string "success"
+// @Failure      400  {string}  string "error"
+// @Failure      404  {string}  string "error"
+// @Failure      500  {string}  string "error"
+// @Router       /changedinnerstatus [put]
 func (u *HTTPHandler) UpdateDinnerFoodStatus(c *gin.Context) {
 	user, err := u.GetKitchenStaffFromContext(c)
 	log.Println("user in context", user)
@@ -88,6 +111,12 @@ func (u *HTTPHandler) UpdateDinnerFoodStatus(c *gin.Context) {
 
 	if err := c.BindJSON(&status); err != nil {
 		helpers.JSON(c, "internal server error", 500, nil, []string{"internal server error"})
+		return
+	}
+
+	inputField, err := repository.StatusEnum(status.Status)
+	if err != nil {
+		helpers.JSON(c, "This is an internal server error", 500, inputField, []string{"incorrect status field"})
 		return
 	}
 

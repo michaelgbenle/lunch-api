@@ -65,6 +65,14 @@ func (u *userService) KitchenStaffResetPassword(id, newPassword string) (*models
 	return u.userRepository.KitchenStaffResetPassword(id, newPassword)
 }
 
+func (u *userService) FindActiveUsersByMonth() (interface{}, error) {
+	return u.userRepository.FindActiveUsersByMonth()
+}
+
+func (u *userService) FindNumbersOfScannedUsers(date string) (int64, error) {
+	return u.userRepository.FindNumbersOfScannedUsers(date)
+}
+
 func (u *userService) FindFoodBenefactorByFullName(fullname string) (*models.FoodBeneficiary, error) {
 	return u.userRepository.FindFoodBenefactorByFullName(fullname)
 }
@@ -200,4 +208,34 @@ func (u *userService) AdminBlockFoodBeneficiary(userID string) error {
 
 func (u *userService) AdminRemoveFoodBeneficiary(userID string) error {
 	return u.userRepository.AdminRemoveFoodBeneficiary(userID)
+}
+
+func (u *userService) FindFoodBenefactorQRCodeMealRecord(mealId, userId string) (*models.QRCodeMealRecords, error) {
+	return u.userRepository.FindFoodBenefactorQRCodeMealRecord(mealId, userId)
+}
+func (u *userService) CreateFoodBenefactorQRMealRecord(mealRecord *models.QRCodeMealRecords) error {
+	return u.userRepository.CreateFoodBenefactorQRMealRecord(mealRecord)
+}
+func (u *userService) NumberOfBlockedBeneficiary() (int64, error) {
+	return u.userRepository.NumberOfBlockedBeneficiary()
+}
+
+func (u *userService) GetBlockedBeneficiary() ([]models.FoodBeneficiary, error) {
+	return u.userRepository.GetBlockedBeneficiary()
+}
+
+func (u *userService) UpdateFoodStatusById(id string, status string) error {
+	return u.userRepository.UpdateFoodStatusById(id, status)
+}
+
+func (u *userService) GetAllFoodBeneficiaries() ([]models.FoodBeneficiary, error) {
+	return u.userRepository.GetAllFoodBeneficiaries()
+}
+
+func (u *userService) FindFoodByDate(year int, month int, day int) ([]models.Food, error) {
+	return u.userRepository.FindFoodByDate(year, month, day)
+}
+
+func (u *userService) FindListOfScannedUsers(date string, pagination *models.Pagination) ([]models.UserDetails, error) {
+	return u.userRepository.FindListOfScannedUsers(date, pagination)
 }
